@@ -1,31 +1,34 @@
 ## Ruby best practices and guidelines
 
 ### Develop the most generic as possible
-Always try to develop the most generic as possible, at least for those elements that are not strictly related to your domain. That is, think if the piece of code you're developing can be used in other application and how far it can go.
+Always try to develop the most generic as possible, at least for those elements that are not
+strictly related to your domain. That is, think if the piece of code you're developing can be used
+in other application and how far it can go.
 
 ### Do not repeat your code
-Don't repeat yourself. Whenever possible, re-use the code you wrote, generalize the most as possible and extract functionality to methods.
+Don't repeat yourself. Whenever possible, re-use the code you wrote, generalize the most as possible
+and extract functionality to methods.
 
 ### Do not use `nil` object
-Why? Because it will eventually add more complexity to your code, that is because nested validations would appear. Take a look at the following example:
+Why? Because it will eventually add more complexity to your code, that is because nested validations
+would appear. Take a look at the following example:
 
 #### With nils (bad)
 ```ruby
 class User
   def contact_address
-    unless self.contact.nil?
-      unless self.contact.address.nil?
-        self.contact.address
-      else
-        'The user contact has no address'
-      end
-    else
+    if self.contact.nil?
       'The user has no contact information'
+    elsif self.contact.address.nil?
+      'The user contact has no address'
+    else
+      self.contact.address
     end
   end
 end
 ```
-As you can see, there are multiple nested validations, which can be avoided. For instance, using the following solutions:
+As you can see, there are multiple nested validations, which can be avoided. For instance, using the
+following solutions:
 
 #### Without nils (good)
 
@@ -39,7 +42,8 @@ class User
   end
 end
 ```
-In this case we are not allowing to create a an `User` object if the given contact is `nil`, in this way we won't need to validate for a contact anymore when working with that particular instance.
+In this case we are not allowing to create a an `User` object if the given contact is `nil`, in this
+way we won't need to validate for a contact anymore when working with that particular instance.
 
 ####  Without nils (good)
 ```ruby
@@ -49,14 +53,18 @@ class User
   end
 end
 ```
-Using default values could be a good way to avoid validations. In the above example we are using the class `UnknownContact` in case that the current user's contact is `nil`.
-*Notice that the* `UnknownContact` *instance is assigned to the user once it is required by the first time.*
+Using default values could be a good way to avoid validations. In the above example we are using the
+class `UnknownContact` in case that the current user's contact is `nil`.
+*Notice that the* `UnknownContact` *instance is assigned to the user once it is required by the
+first time.*
 
 ### Constantly refactor your code
-Try to keep your code clean, and the best way to do it is not to postpone refactoring, because it will get accumulated. Refactor the simplest piece of code everyday, always as possible.
+Try to keep your code clean, and the best way to do it is not to postpone refactoring, because it
+will get accumulated. Refactor the simplest piece of code everyday, always as possible.
 
 ## Language Structure and Layout
-In this section you'll find some guidelines about the language layout, what is recommended, how to write a good syntax, etc.
+In this section you'll find some guidelines about the language layout, what is recommended, how to
+write a good syntax, etc.
 
 ##### Tab size
 Use **two (2)** spaces to indent your code
@@ -66,7 +74,8 @@ class Example
 end
 ```
 ##### Space between...
-Use spaces between operators *(except exponential)*, commas, colons, semicolons, and even after and before `{` and `}`, why? it makes your code more readable, look at the example below:
+Use spaces between operators *(except exponential)*, commas, colons, semicolons, and even after and
+before `{` and `}`, why? it makes your code more readable, look at the example below:
 ```ruby
 # Wrong
 var>1?'yes':'no'
@@ -74,7 +83,8 @@ var>1?'yes':'no'
 # Good
 var > 1 ? 'yes' : 'no'
 ```
-As you can see the wrong way looks ugly and becomes hard to read, let's look another couple of examples:
+As you can see the wrong way looks ugly and becomes hard to read, let's look another couple of
+examples:
 ```ruby
 # Wrong
 result = (2*5) ** 5
@@ -112,7 +122,8 @@ name = case hour
 ```
 
 ##### Chaining a method call
-When you are chaining multiple method calls, keep the `.` in the second line, so that one doesn't have to read the first line to undestand what's going on in the second one.
+When you are chaining multiple method calls, keep the `.` in the second line, so that one doesn't
+have to read the first line to understand what's going on in the second one.
 ```ruby
 # Wrong
 user.contacts.most_recent.
@@ -124,32 +135,40 @@ user.contacts.most_recent
 ```
 
 ##### Align parameters when calling a method
-Maybe you had wondered how to split a lot of parameters when calling a function. Okay, lets assume that we have this line with a function call and many parameters:
+Maybe you had wondered how to split a lot of parameters when calling a function. Okay, lets assume
+that we have this line with a function call and many parameters which exceeds my characters per
+line limit:
 ```ruby
 # Wrong
-User.create(name: "Santiago", last_name: "Vanegas", phone: "2222222", gender: "male")
+User.create(name: 'Santiago', last_name: 'Vanegas', phone: '2222222', gender: 'male', city: 'Medellín', country: 'Colombia')
 ```
-Now we can use two methods to splite those parameters in multiple lines, as follows:
+Now we can use two methods to split those parameters in multiple lines, as follows:
 ```ruby
 # Good
-User.create(name: "Santiago",
-            last_name: "Vanegas",
-            phone: "2222222",
-            gender: "male")
+User.create(name: 'Santiago',
+            last_name: 'Vanegas',
+            phone: '2222222',
+            gender: 'male',
+            city: 'Medellín',
+            country: 'Colombia')
 ```
 Or
 ```ruby
 # Good
 User.create(
-  name: "Santiago",
-  last_name: "Vanegas",
-  phone: "2222222",
-  gender: "male"
+  name: 'Santiago',
+  last_name: 'Vanegas',
+  phone: '2222222',
+  gender: 'male',
+  city: 'Medellín',
+  country: 'Colombia'
 )
 ```
 
 ##### Columns limit
-Most of the guidelines recommend to use **80** characters limit in your editor, but I personally recommend to user **100** when using a large resolution screen, because it will perfectly fit even if working in splitted screen mode.
+Most of the guidelines recommend to use **80** characters limit in your editor, but I personally
+recommend to user **100** when using a large resolution screen, because it will perfectly fit even
+if working in split screen mode.
 
 ## Syntax
 Do not miss syntax details, we will cover a couple of guidelines below.
@@ -213,6 +232,23 @@ end
 # Good
 unless valid_account
   positive_content
+end
+```
+**Note:** It is not recommended to use `unless` when there is an `elsif` or `else` statement right
+after it.
+```ruby
+# Bad
+unless valid_account
+  positive_content
+else
+  negative_content
+end
+
+# Good
+if !valid_account
+  positive_content
+else
+  negative_content
 end
 ```
 
@@ -302,7 +338,8 @@ hello_world # As always
 ```
 
 ##### Avoid redundant comments
-Most of the times we expect to undestand the code with only reading it, we don't need a comment for something obvious
+Most of the times we expect to understand the code with only reading it, we don't need a comment for
+something obvious
 ```ruby
 # Bad
 return 1 # returns 1
