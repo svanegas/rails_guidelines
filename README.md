@@ -345,6 +345,158 @@ something obvious
 return 1 # returns 1
 ```
 
+## Rails best practices and guidelines
+As you can see, all previous guidelines and best practices applies to Ruby language itself, coming
+up next we'll cover a some of the Rails specific framework guidelines and best practices.
+
+### Controllers
+Lets start talking about controllers in Rails:
+
+##### Skinny controllers
+Try to keep your controllers with no business logic code, they shouldn't contain it, that means
+controllers should be skinny and only retrieve data for the view layer.
+
+##### One single method
+If your controller action calls only one method you're doing it perfectly right (beyond *find* or
+*new*)
+
+##### Sharing instance variables
+Try not to share more than two (2) instance variables between a particular view and its controller.
+
+### Models
+A model is the main connection point with your database.
+
+##### Model names
+Name your model in a way that it is understandable, meaningful but short. Try not to use any
+abbreviation.
+
+##### Active record defaults
+Do not modify or alter ActiveRecord defaults, such as table names, primary keys, foreign keys, etc.
+
+##### Group macro-style methods
+Set all macro-style methods such as `validates`, `has_many`, `belongs_to`, etc, at the beginning of
+the class definition.
+
+##### Use the new way of validations
+```ruby
+# Bad
+validates_presence_of :name
+validates_length_of name, minimum: 2
+
+# Good
+validates :name, presence: true, length: { minimum: 2 }
+```
+
+##### Generic validators
+And we return again to the same topic, about don't repeating your code and keeping generic software.
+If you have built some validator that you think could work for any other application, consider
+moving it to a **separate gem**.
+
+### ActiveRecord queries
+Short time ago I was writing a query for a JSON field (postgres), I used string interpolation and
+I realized that something was wrong there. I started to look for a better way to do it and came up
+with the parametrized queries. They will avoid SQL injection.
+```ruby
+# Bad
+User.where("metadata -> #{params[:attribute]}")
+
+# Good
+User.where("metadata -> ?", params[:attribute])
+```
+
+##### `find` v.s. `where`
+Consider using `find` if you only have to retrieve one single record by its id
+```ruby
+# Bad
+User.where(id: id).first
+
+# Good
+User.find(id)
+```
+
+##### `find_by` v.s. `where`
+Consider using `find_by` if you only have to retrieve one single record by some attributes
+```ruby
+# Bad
+User.where(name: 'Santiago', gender: 'male').first
+
+# Good
+User.find(name: 'Santiago', gender: 'male')
+```
+
+##### Usage of `where.not` in queries
+Consider using `where.not` statement over SQL on its pure form
+```ruby
+# Bad
+User.where("name != ?", name)
+
+# Good
+User.where.not(name: name)
+```
+
+### Views
+When talking about views you should keep in mind a couple of considerations:
+
+##### Calling models
+Do not ever call a model directly from a view.
+
+##### Complex formatting
+Avoid complex formatting in views, feel free to use methods to format in some helper or model.
+
+##### Use layouts
+Do you feel you are repeating code? Check what pieces of code you can extract and put in a partial
+template or layouts.
+
+### Mailers
+When using a mailer, there are too some considerations:
+
+##### Naming a mailer
+Name your mailer with the *Mailer* suffix, that will help you to recognize immediately a mailer and
+differentiate it from a standard view.
+
+##### Providing templates
+When you create a mail action, provide both HTML and plain-text view templates. Remember that there
+are also some best practices about writing an email HTML, which unfortunately it is not our domain
+in this guide.
+
+### Time
+At the time of doing this guide, I didn't know about the following practices, I think they are
+really important because I've always had problems with time zones.
+
+##### Configure timezone
+In your `application.rb` file, configure your timezone accordingly.
+```ruby
+config.time_zone = 'Eastern European Time'
+# Below value can be either :utc or :local, by default it is :utc
+config.active_record.default_timezone = :local
+```
+
+##### Do not user `Time.parse`
+If you use `Time.parse` it will assume time string given is n the system's time zone.
+```ruby
+# Bad
+Time.parse('2015-01-01 12:01:19')
+
+# Good
+Time.zone.parse('2015-01-01 12:01:19')
+# => Mon, 02 Mar 2015 19:05:37 EET +02:00
+```
+
+##### Do not use `Time.now`
+If you use `Time.now` it ignores your configured time zone and returns a time in the system's one.
+```ruby
+# Bad
+Time.now
+
+# Good
+Time.zone.now # => Sat, 13 Mar 2014 23:01:13 EET +02:00
+Time.current  # => Sat, 13 Mar 2014 23:01:13 EET +02:00
+```
+
+
 ### References
 https://www.youtube.com/watch?v=F63RPaZIuN4
+
 https://github.com/bbatsov/ruby-style-guide
+
+https://github.com/bbatsov/rails-style-guide#one-method
