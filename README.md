@@ -1,5 +1,15 @@
 # Best practices and guidelines for Ruby, Rails and RSpec
 
+In the following guide you will find a set of best practices and guidelines for Ruby programming
+language. Also, we are covering the specific Ruby on Rails framework, with some best practices and
+guidelines. Finally, you'll also find guidelines for the RSpec framework, used for Behaviour-Driven
+Development.
+
+Most of the content you will find here is based on the references that are stated at the end of
+this document. Modifications were made according to my personal preferences, that means you may
+disagree with some particular guideline or best practice, is that why I am open to any of your
+opinions, just let me know and I will consider change it if required.
+
 ## Ruby
 
 ##### Develop the most generic as possible
@@ -689,6 +699,6 @@ it 'changes its color to blue'
 
 * https://github.com/bbatsov/ruby-style-guide
 
-* https://github.com/bbatsov/rails-style-guide#one-method
+* https://github.com/bbatsov/rails-style-guide
 
 * http://betterspecs.org/es/
