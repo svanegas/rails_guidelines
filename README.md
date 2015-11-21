@@ -1,20 +1,22 @@
-## Ruby best practices and guidelines
+# Best practices and guidelines for Ruby, Rails and RSpec
 
-### Develop the most generic as possible
+## Ruby
+
+##### Develop the most generic as possible
 Always try to develop the most generic as possible, at least for those elements that are not
 strictly related to your domain. That is, think if the piece of code you're developing can be used
 in other application and how far it can go.
 
-### Do not repeat your code
+##### Do not repeat your code
 Don't repeat yourself. Whenever possible, re-use the code you wrote, generalize the most as possible
 and extract functionality to methods.
 
-### Do not use `nil` object
+##### Do not use `nil` object
 Why? Because it will eventually add more complexity to your code, that is because nested validations
 would appear. Take a look at the following example:
 
-#### With nils (bad)
 ```ruby
+# Bad - With nils
 class User
   def contact_address
     if self.contact.nil?
@@ -30,9 +32,8 @@ end
 As you can see, there are multiple nested validations, which can be avoided. For instance, using the
 following solutions:
 
-#### Without nils (good)
-
 ```ruby
+# Good - Without nils
 class User
   def initialize(contact)
     if contact.nil? || contact.address.nil?
@@ -45,8 +46,8 @@ end
 In this case we are not allowing to create a an `User` object if the given contact is `nil`, in this
 way we won't need to validate for a contact anymore when working with that particular instance.
 
-####  Without nils (good)
 ```ruby
+# Good - Without nils
 class User
   def contact
     @contact ||= UnknownContact.new
@@ -58,11 +59,11 @@ class `UnknownContact` in case that the current user's contact is `nil`.
 *Notice that the* `UnknownContact` *instance is assigned to the user once it is required by the
 first time.*
 
-### Constantly refactor your code
+##### Constantly refactor your code
 Try to keep your code clean, and the best way to do it is not to postpone refactoring, because it
 will get accumulated. Refactor the simplest piece of code everyday, always as possible.
 
-## Language Structure and Layout
+### Language Structure and Layout
 In this section you'll find some guidelines about the language layout, what is recommended, how to
 write a good syntax, etc.
 
@@ -170,7 +171,7 @@ Most of the guidelines recommend to use **80** characters limit in your editor, 
 recommend to user **100** when using a large resolution screen, because it will perfectly fit even
 if working in split screen mode.
 
-## Syntax
+### Syntax
 Do not miss syntax details, we will cover a couple of guidelines below.
 
 ##### Use parentheses when arguments are present
@@ -295,7 +296,7 @@ enabled ||= true
 enabled = true if enabled.nil?
 ```
 
-## Names
+### Names
 ##### Name your variables as understandable english words
 
 ```ruby
@@ -327,7 +328,7 @@ def enabled?
 end
 ```
 
-## Annotations
+### Annotations
 Always leave a white space between the comment character `#` and the comment text:
 ```ruby
 # Bad
@@ -345,7 +346,7 @@ something obvious
 return 1 # returns 1
 ```
 
-## Rails best practices and guidelines
+## Ruby on Rails
 As you can see, all previous guidelines and best practices applies to Ruby language itself, coming
 up next we'll cover a some of the Rails specific framework guidelines and best practices.
 
@@ -493,10 +494,201 @@ Time.zone.now # => Sat, 13 Mar 2014 23:01:13 EET +02:00
 Time.current  # => Sat, 13 Mar 2014 23:01:13 EET +02:00
 ```
 
+## RSpec
+Now we are going to check some of the best practices and guidelines while writing unit tests using
+RSpec.
+
+##### Describing methods
+We can simply use the Ruby convention when describing a method, i.e. if we are testing an instance
+method we should use `#` as prefix, and if we are testing a class method we should use `.`. Let's
+take a look at the following example.
+
+```ruby
+class User
+  def premium?
+    # Some content
+  end
+
+  def self.authenticate
+    # Some content
+  end
+end
+```
+
+Considering the above class, we can write tests for the `User` methods as follows:
+
+```ruby
+# Bad
+describe 'the authenticate method for User' do
+describe 'whether the user is premium or not' do
+
+# Good
+describe '.authenticate' do
+describe '#premium?' do
+```
+
+##### Use contexts
+Using contexts helps the tests to be more clear and organized, so it eventually will make them more
+readable.
+
+```ruby
+# Bad
+it 'returns 200 when the user is logged in' do
+  # Content
+end
+
+it 'returns 401 when the user is not logged in' do
+  # Content
+end
+
+# Good
+context 'when tue user is logged in' do
+  it 'returns 200' do
+    # Content
+  end
+end
+
+context 'when tue user is not logged in' do
+  it 'returns 401' do
+    # Content
+  end
+end
+```
+
+##### Short descriptions
+Try to write short descriptions, no more than 40 characters. *Hint*: Use contexts to split long
+descriptions
+```ruby
+# Bad
+it 'raises an exception if an unexpected param was passed' do
+  # Content
+end
+
+# Good
+context 'when an unexpected param was passed' do
+  it 'raises an exception' do
+    # Content
+  end
+end
+```
+
+##### Try all possible cases
+Consider all valid, extreme and invalid cases. For instance, check the following piece of code:
+```ruby
+before_filter :find_owned_cars
+before_filter :find_car
+
+def exhibit
+  render 'show'
+end
+```
+
+We have to consider all possible branches, look how we can test this code:
+
+```ruby
+# Bad
+it 'shows the car'
+
+# Good
+describe '#exhibit' do
+  context 'when the car is found' do
+    it 'responds with 200'
+    it 'shows the car'
+  end
+
+  context 'when the car is not found' do
+    it 'responds with 404'
+  end
+
+  context 'when the car is not owned' do
+    it 'responds with 401'
+  end
+end
+```
+
+##### `expect` v.s. `should`
+Consider using `expect` syntax instead of `should`.
+
+```ruby
+# Bad
+it 'returns an empty string' do
+  response.should eq ""
+end
+
+# Good
+it 'returns an empty string' do
+  expect(response).to eq ""
+end
+```
+
+##### Use `let` and `let!`
+When one has to assign a variable, instead of using a `before` block to create an instance variable,
+the `let` method can me used. When using `let` the specified variable will only be loaded when it
+is requested somewhere in the code, keeping alive until test ends.
+
+```ruby
+# Bad
+describe '#increase_power' do
+  before { @fuel = create(:combustion) }
+
+  it 'applies the given fuel to the tank' do
+    expect(@tank.fuel).to eq @fuel.quantity
+  end
+end
+
+# Good
+describe '#increase_power' do
+  let(:fuel) { create(:combustion) }
+
+  it 'applies the given fuel to the tank' do
+    expect(@tank.fuel).to eq fuel.quantity
+  end
+end
+```
+
+Coming up next, we will see an example that will help us to understand how let works.
+```ruby
+# This
+let(:yolo) { Yolo.new }
+
+# Is quite equivalent to this:
+def yolo
+  @yolo ||= Yolo.new
+end
+```
+
+##### Use factories
+Consider reading something about the usage of factories. I recommend you to check [Factory Girl].
+It is a really good replacement for fixtures, which shouldn't be used anymore.
+Here is an example of using a fixture v.s. using a factory:
+
+```ruby
+# Bad
+user = User.create(name: 'Santiago', gender: 'male', country: 'Colombia', city: 'Medellín')
+
+# Good
+user = FactoryGirl.create :user
+```
+
+
+##### Do not use **should** in your descriptions
+When describing a test, do not use **should** word. Always use third person present sentences.
+
+```ruby
+# Bad
+it 'should change its color to blue'
+
+# Good
+it 'changes its color to blue'
+```
+
+[Factory Girl]:https://github.com/thoughtbot/factory_girl
 
 ### References
-https://www.youtube.com/watch?v=F63RPaZIuN4
+* https://www.youtube.com/watch?v=F63RPaZIuN4
 
-https://github.com/bbatsov/ruby-style-guide
+* https://github.com/bbatsov/ruby-style-guide
 
-https://github.com/bbatsov/rails-style-guide#one-method
+* https://github.com/bbatsov/rails-style-guide#one-method
+
+* http://betterspecs.org/es/
